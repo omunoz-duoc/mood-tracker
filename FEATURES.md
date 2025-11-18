@@ -23,14 +23,27 @@ Implemented basic login screen layout with email and password input fields, "Ini
 
 ---
 
-## Upcoming Features
+### feat: add login form validation
+**Branch**: `feature/login-validation`
+**Status**: In Progress
 
-### Phase 1.2: Login Form Validation
-**Planned Branch**: `feature/login-validation`
-- Add `LoginValidator` class for form validation logic
-- Implement validation rules (email format, password length ≥ 6)
-- Add error display with icons and shake animation
-- Visual feedback for invalid inputs
+**Files Added:**
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/domain/validators/ValidationResult.kt` - Data classes for validation results
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/domain/validators/LoginValidator.kt` - Login validation logic with email and password rules
+
+**Files Modified:**
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/ui/screens/LoginScreen.kt` - Integrated validation with error display, icons, and shake animation
+
+**Description:**
+Implemented form validation logic separated from UI components. Created `LoginValidator` with rules for email format validation (using Android Patterns) and password length validation (minimum 6 characters). Added visual feedback with error icons, error messages below fields, and shake animation when validation fails. Errors are cleared automatically when user starts typing.
+
+**Validation Rules:**
+- Email: Must not be empty and must match valid email pattern
+- Password: Must not be empty and must be at least 6 characters long
+
+---
+
+## Upcoming Features
 
 ### Phase 1.3: Database Setup
 **Planned Branch**: `feature/room-database`
