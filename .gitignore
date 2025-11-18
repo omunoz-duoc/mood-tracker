@@ -16,3 +16,5 @@ local.properties
 
 *.md
 !README.md
+!CLAUDE.md
+!FEATURES.md
