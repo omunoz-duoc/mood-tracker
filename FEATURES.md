@@ -43,14 +43,36 @@ Implemented form validation logic separated from UI components. Created `LoginVa
 
 ---
 
-## Upcoming Features
+### feat: configure Room database
+**Branch**: `feature/room-database`
+**Status**: Completed
 
-### Phase 1.3: Database Setup
-**Planned Branch**: `feature/room-database`
-- Configure Room database
-- Create User entity
-- Create UserDao
-- Implement UserRepository
+**Files Added:**
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/data/local/entities/User.kt` - User entity with id, email, passwordHash, createdAt
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/data/local/dao/UserDao.kt` - Data Access Object with authentication queries
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/data/local/AppDatabase.kt` - Room database singleton instance
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/data/repository/UserRepository.kt` - Repository pattern for user management
+
+**Files Modified:**
+- `gradle/libs.versions.toml` - Added Room and KSP versions and library definitions
+- `app/build.gradle.kts` - Added KSP plugin and Room dependencies
+
+**Description:**
+Configured Room database for local SQLite persistence. Created User entity with unique email constraint and auto-generated ID. Implemented UserDao with suspend functions for user registration, login, and queries. Set up AppDatabase singleton with fallback to destructive migration. Created UserRepository with password hashing (SHA-256) and clean API for user authentication operations.
+
+**Database Schema:**
+- **users** table: id (PK, auto-increment), email (unique), passwordHash, createdAt
+- UserDao queries: insertUser, getUserByEmail, login, emailExists, getUserById, deleteAllUsers
+
+**Features:**
+- Password hashing with SHA-256 before storage
+- Email uniqueness constraint at database level
+- Suspend functions for coroutine support
+- Repository pattern separating data layer from UI
+
+---
+
+## Upcoming Features
 
 ### Phase 1.4: Functional Login
 **Planned Branch**: `feature/login-functionality`
