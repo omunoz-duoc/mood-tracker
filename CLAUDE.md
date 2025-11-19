@@ -12,11 +12,11 @@ The app allows users to track their daily mood/emotions, persist data locally us
 
 ### Core Features
 
-1. **User Authentication**: Login and registration system with form validation
-2. **Mood Tracking**: Daily emotion selection with visual feedback and notes
-3. **Data Persistence**: SQLite database using Room for users and mood entries
-4. **History Visualization**: View past mood entries with simple charts
-5. **Native Resources**: Haptic feedback on interactions, local notifications for reminders
+1. **User Authentication**: ✓ Login and registration system with form validation and session persistence
+2. **Mood Tracking**: ✓ Daily emotion selection (7 moods) with haptic feedback and optional notes
+3. **Data Persistence**: ✓ SQLite database using Room for users and mood entries with cascade delete
+4. **History Visualization**: ✓ Animated mood history screen with chronological entry display
+5. **Native Resources**: ✓ Haptic feedback (vibration) and local notifications for daily reminders
 
 ## Build System & Commands
 
@@ -67,12 +67,13 @@ On Windows, use `gradlew.bat` instead of `./gradlew`.
 
 - **Language**: Kotlin 2.0.21
 - **UI Framework**: Jetpack Compose (Material 3)
-- **Navigation**: Navigation Compose
-- **Database**: Room (SQLite wrapper) - to be added
+- **Navigation**: Navigation Compose 2.8.5
+- **Database**: Room 2.6.1 (SQLite wrapper) with KSP annotation processing
+- **State Management**: DataStore Preferences, StateFlow, ViewModel
 - **Min SDK**: 24 (Android 7.0)
 - **Target/Compile SDK**: 36
 - **Build Tool**: Gradle 8.13.1
-- **Native Resources**: Vibration (Haptic Feedback), Local Notifications - to be added
+- **Native Resources**: Vibration (Haptic Feedback), Local Notifications (AlarmManager)
 
 ### Project Structure
 
@@ -80,31 +81,49 @@ The codebase follows a modular architecture organized by layers:
 
 ```
 app/src/main/java/cl/duoc/dsy1105/moodtracker/
-├── MainActivity.kt                      # App entry point
+├── MainActivity.kt                      # ✓ App entry point
 ├── ui/                                  # UI layer
 │   ├── screens/                         # Screen composables
-│   │   ├── LoginScreen.kt              # ✓ Implemented
-│   │   ├── RegisterScreen.kt           # ✓ Placeholder
-│   │   ├── HomeScreen.kt               # Future: Phase 2
-│   │   ├── MoodSelectionScreen.kt      # Future: Phase 2
-│   │   └── HistoryScreen.kt            # Future: Phase 3
-│   ├── components/                      # Reusable UI components (future)
+│   │   ├── LoginScreen.kt              # ✓ Login with validation
+│   │   ├── RegisterScreen.kt           # ✓ Registration with confirmation
+│   │   ├── HomeScreen.kt               # ✓ Home with notifications toggle
+│   │   ├── MoodSelectionScreen.kt      # ✓ Mood selection with haptics
+│   │   └── HistoryScreen.kt            # ✓ Animated mood history
+│   ├── viewmodel/                       # ViewModels
+│   │   ├── LoginViewModel.kt           # ✓ Login state management
+│   │   ├── RegisterViewModel.kt        # ✓ Registration state
+│   │   ├── MoodViewModel.kt            # ✓ Mood tracking state
+│   │   └── HistoryViewModel.kt         # ✓ History data loading
 │   └── theme/                           # Material3 theme configuration
 │       ├── Theme.kt
 │       ├── Color.kt
 │       └── Type.kt
-├── domain/                              # Business logic (future)
-│   └── validators/                      # Form validation logic (Phase 1.2)
-├── data/                                # Data layer (Phase 1.3+)
-│   ├── local/                           # Room database
-│   │   ├── entities/                    # User, MoodEntry
+├── domain/                              # Business logic
+│   ├── model/                           # Domain models
+│   │   └── MoodType.kt                 # ✓ Enum with 7 emotions
+│   └── validators/                      # Form validation logic
+│       ├── ValidationResult.kt         # ✓ Validation data classes
+│       ├── LoginValidator.kt           # ✓ Email/password validation
+│       └── RegisterValidator.kt        # ✓ Registration validation
+├── data/                                # Data layer
+│   ├── local/                           # Local data sources
+│   │   ├── entities/                    # Database entities
+│   │   │   ├── User.kt                 # ✓ User with unique email
+│   │   │   └── MoodEntry.kt            # ✓ Mood entry with FK
 │   │   ├── dao/                         # Data Access Objects
-│   │   └── AppDatabase.kt              # Room database instance
+│   │   │   ├── UserDao.kt              # ✓ User CRUD operations
+│   │   │   └── MoodDao.kt              # ✓ Mood entry operations
+│   │   ├── AppDatabase.kt              # ✓ Room database (v2)
+│   │   ├── SessionManager.kt           # ✓ DataStore session
+│   │   └── NotificationPreferences.kt  # ✓ Notification settings
 │   └── repository/                      # Repository pattern
-│       ├── UserRepository.kt           # User auth & management
-│       └── MoodRepository.kt           # Mood tracking
+│       ├── UserRepository.kt           # ✓ User auth with SHA-256
+│       └── MoodRepository.kt           # ✓ Mood tracking
+├── notifications/                       # Notification system
+│   ├── NotificationHelper.kt           # ✓ Notification management
+│   └── NotificationReceiver.kt         # ✓ Alarm broadcast receiver
 └── navigation/                          # Navigation graph
-    └── Navigation.kt                    # ✓ Implemented
+    └── Navigation.kt                    # ✓ Complete navigation flow
 ```
 
 ### Key Configuration Files
@@ -122,8 +141,10 @@ Key dependencies:
 - Activity Compose for Compose integration
 - Compose BOM (Bill of Materials) for consistent Compose versions
 - Material3 for modern UI components
-- **Navigation Compose**: For screen navigation
-- **Room** (to be added): SQLite database with compile-time verification
+- **Navigation Compose 2.8.5**: For screen navigation
+- **Room 2.6.1**: SQLite database with KSP compile-time verification
+- **DataStore Preferences 1.1.1**: Persistent key-value storage
+- **ViewModel Compose**: State management and lifecycle awareness
 - JUnit, Espresso for testing
 
 ### Compose Architecture
@@ -144,30 +165,36 @@ The app uses Jetpack Compose with:
 
 ## Development Roadmap
 
-The project is being developed in structured phases with specific commit conventions:
+All phases completed! The project followed structured development with feature branches and conventional commits.
 
-### Phase 1: Authentication (Current)
-- **1.1**: Login screen layout (`feat: add login screen layout`) ✓
-- **1.2**: Form validation logic with visual feedback and animations
-- **1.3**: Room database setup with User entity and DAO
-- **1.4**: Functional login with session persistence (DataStore or Session table)
-- **1.5**: Complete registration flow
+### ✓ Phase 1: Authentication (Completed)
+- **1.1**: Login screen layout with email/password fields
+- **1.2**: Form validation with LoginValidator and visual feedback (shake animation)
+- **1.3**: Room database with User entity, UserDao, and AppDatabase
+- **1.4**: Functional login with DataStore session persistence and LoginViewModel
+- **1.5**: Complete registration flow with RegisterValidator and password confirmation
 
-### Phase 2: Mood Tracker Core
-- **2.1**: Home screen with greeting and CTA
-- **2.2**: Mood selection screen with 5-7 emotions, haptic feedback, and animations
-- **2.3**: Optional notes form with validation
-- **2.4**: MoodEntry entity and database persistence
+### ✓ Phase 2: Mood Tracker Core (Completed)
+- **2.1**: HomeScreen with user email, notification toggle, and navigation buttons
+- **2.2**: MoodSelectionScreen with 7 emotions, haptic feedback, and scale animations
+- **2.3**: Optional notes input via MoodNoteDialog
+- **2.4**: MoodEntry entity with foreign key, MoodDao, and MoodRepository
 
-### Phase 3: Visualization
-- **3.1**: History screen with mood entries list/charts
-- **3.2**: Entry animations
+### ✓ Phase 3: Visualization (Completed)
+- **3.1**: HistoryScreen with LazyColumn displaying all mood entries
+- **3.2**: Staggered entrance animations (slideInVertically + fadeIn)
+- **3.3**: HistoryViewModel with Flow-based reactive data loading
 
-### Phase 4: Native Resources
-- **4.1**: Local notifications for daily mood tracking reminders
+### ✓ Phase 4: Native Resources (Completed)
+- **4.1**: Local notifications with NotificationHelper and AlarmManager
+- **4.2**: NotificationReceiver for scheduled daily reminders (8:00 PM)
+- **4.3**: NotificationPreferences for persistent notification settings
+- **Native resources**: Vibration (Phase 2) + Notifications (Phase 4)
 
-### Phase 5: Project Closure
-- Final polish, documentation, and APK export
+### ✓ Phase 5: Project Closure (In Progress)
+- Final documentation updates (CLAUDE.md, README.md)
+- APK export for submission
+- Project delivery preparation
 
 ## Development Guidelines
 
@@ -195,19 +222,39 @@ Use structured commit messages following the pattern from `instrucciones-especif
 - Material3 components and theming
 - Use `@Preview` annotations for all composables
 
-### Database Guidelines
+### Database Schema
 
-When implementing Room (Phase 1.3+):
-- Entities go in `data/local/entities/`
-- DAOs go in `data/local/dao/`
-- Database instance in `data/local/AppDatabase.kt`
-- Repositories implement data access patterns in `data/repository/`
-- Planned entities: `User(id, email, passwordHash)`, `MoodEntry(id, userId, moodType, date, note?)`
+Room database (version 2) with the following entities:
 
-### Native Resources
+**User Table** (`users`):
+- `id` (Long, PK, auto-increment)
+- `email` (String, unique index)
+- `passwordHash` (String, SHA-256)
+- `createdAt` (Long, timestamp)
 
-- **Haptic Feedback**: Use Vibrator/VibratorManager for touch feedback on mood selection
-- **Local Notifications**: WorkManager or AlarmManager for daily reminders
+**MoodEntry Table** (`mood_entries`):
+- `id` (Long, PK, auto-increment)
+- `userId` (Long, FK to User with CASCADE delete)
+- `moodType` (String, enum name)
+- `note` (String?, optional)
+- `date` (Long, timestamp)
+- Indices on `userId` and `date` for query optimization
+
+### Native Resources (Implemented)
+
+1. **Haptic Feedback (Vibration)**:
+   - 50ms vibration on mood selection
+   - Version-compatible implementation (Android S+ VibratorManager, legacy Vibrator)
+   - Vibration pattern in notification channel
+   - Requires `VIBRATE` permission
+
+2. **Local Notifications (AlarmManager)**:
+   - Daily reminders at configurable time (default: 8:00 PM)
+   - Repeating daily alarms with AlarmManager
+   - Notification channel creation (Android O+)
+   - Permission handling for Android 13+ (POST_NOTIFICATIONS)
+   - Deep linking to open app when tapped
+   - Requires `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM` permissions
 
 ### Testing
 
