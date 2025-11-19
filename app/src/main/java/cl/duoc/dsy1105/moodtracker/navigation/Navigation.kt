@@ -13,8 +13,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import cl.duoc.dsy1105.moodtracker.data.local.AppDatabase
+import cl.duoc.dsy1105.moodtracker.data.local.NotificationPreferences
 import cl.duoc.dsy1105.moodtracker.data.local.SessionManager
 import cl.duoc.dsy1105.moodtracker.data.repository.UserRepository
+import cl.duoc.dsy1105.moodtracker.notifications.NotificationHelper
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.dsy1105.moodtracker.ui.screens.HistoryScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.HomeScreen
@@ -47,6 +49,11 @@ fun MoodTrackerNavigation() {
         val database = AppDatabase.getDatabase(context)
         UserRepository(database.userDao())
     }
+
+    // Notification management
+    val notificationHelper = remember { NotificationHelper(context) }
+    val notificationPreferences = remember { NotificationPreferences(context) }
+    val notificationsEnabled by notificationPreferences.notificationsEnabledFlow.collectAsState(initial = false)
 
     NavHost(
         navController = navController,
@@ -88,6 +95,7 @@ fun MoodTrackerNavigation() {
 
             HomeScreen(
                 userEmail = userEmail,
+                notificationsEnabled = notificationsEnabled,
                 onLogout = {
                     scope.launch {
                         sessionManager.clearSession()
@@ -101,6 +109,17 @@ fun MoodTrackerNavigation() {
                 },
                 onViewHistory = {
                     navController.navigate(Screen.History.route)
+                },
+                onToggleNotifications = { enabled ->
+                    scope.launch {
+                        notificationPreferences.setNotificationsEnabled(enabled)
+                        if (enabled) {
+                            // Schedule daily notification at 8:00 PM
+                            notificationHelper.scheduleDailyNotification(20, 0)
+                        } else {
+                            notificationHelper.cancelDailyNotification()
+                        }
+                    }
                 }
             )
         }
