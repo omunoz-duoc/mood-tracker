@@ -287,12 +287,93 @@ Integrated history screen into app navigation flow. Added History route to navig
 
 ---
 
-## Upcoming Features
+## Phase 4: Native Resources
 
-### Phase 4: Native Resources
-**Planned Features:**
-- Local notifications for mood tracking reminders
-- Notification scheduling and management
+### feat: add local notification system for daily reminders
+**Branch**: `feature/notifications`
+**Commit**: `3834ce5`
+
+**Files Added:**
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/notifications/NotificationHelper.kt` - Notification management and scheduling
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/notifications/NotificationReceiver.kt` - BroadcastReceiver for scheduled notifications
+
+**Files Modified:**
+- `app/src/main/AndroidManifest.xml` - Added notification permissions and receiver registration
+
+**Description:**
+Implemented local notification system for daily mood tracking reminders. Created NotificationHelper to manage notification channels, display notifications, and schedule daily reminders using AlarmManager. Implemented NotificationReceiver BroadcastReceiver to handle scheduled notification triggers. Added required permissions for Android 13+ including POST_NOTIFICATIONS and SCHEDULE_EXACT_ALARM. Configured notification channel with vibration pattern and proper intent handling to open app when notification is tapped.
+
+**Permissions Added:**
+- POST_NOTIFICATIONS - For showing notifications on Android 13+
+- SCHEDULE_EXACT_ALARM - For precise notification scheduling
+- USE_EXACT_ALARM - Fallback for exact alarm scheduling
+
+**Features:**
+- NotificationHelper with channel creation and management
+- Permission checks for Android TIRAMISU (API 33+)
+- Daily notification scheduling at configurable time (default: 8:00 PM)
+- Repeating AlarmManager for daily reminders
+- Notification with custom title, content, and vibration pattern
+- PendingIntent to open MainActivity when notification tapped
+- Methods to schedule, cancel, and check notification status
+- NotificationReceiver to handle alarm broadcasts
+
+**Native Resources Used:**
+1. **Notifications** - Local notifications for daily reminders
+2. **Vibration** - Haptic feedback (from Phase 2)
+
+---
+
+### feat: add notification preferences with DataStore
+**Branch**: `feature/notifications`
+**Commit**: `5db7cc5`
+
+**Files Added:**
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/data/local/NotificationPreferences.kt` - DataStore-based preference storage
+
+**Description:**
+Created NotificationPreferences class using DataStore Preferences to persist notification enabled/disabled state across app sessions. Implemented reactive Flow-based state updates for seamless UI integration. Provides suspend functions for updating preferences and Flow for collecting state changes.
+
+**Features:**
+- DataStore Preferences for persistent storage
+- notificationsEnabledFlow for reactive state updates
+- setNotificationsEnabled suspend function
+- Boolean flag for notification enabled state
+- Persists across app restarts and sessions
+
+---
+
+### feat: integrate notification toggle into HomeScreen
+**Branch**: `feature/notifications`
+**Commit**: `0004666`
+
+**Files Modified:**
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/ui/screens/HomeScreen.kt` - Added notification settings Card
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/navigation/Navigation.kt` - Connected notification logic
+
+**Description:**
+Integrated notification management into HomeScreen UI with a dedicated settings Card. Added Switch component for toggling daily reminders on/off. Connected UI to NotificationHelper for scheduling/canceling notifications and NotificationPreferences for state persistence. Made HomeScreen scrollable to accommodate additional content. Display shows notification icon, current status, and scheduled time when enabled.
+
+**Features:**
+- Notification settings Card with icon and switch
+- Real-time status display (Enabled/Disabled)
+- Shows scheduled time (20:00 hrs) when notifications enabled
+- Toggle switch connected to notification system
+- Automatic scheduling/canceling based on switch state
+- Scrollable layout for better mobile UX
+- Integrated with NotificationPreferences Flow
+
+**User Flow:**
+1. User toggles notification switch on HomeScreen
+2. State saved to DataStore via NotificationPreferences
+3. NotificationHelper schedules/cancels daily alarm at 8:00 PM
+4. At scheduled time, NotificationReceiver triggers notification
+5. User sees notification: "¿Cómo te sientes hoy?"
+6. Tapping notification opens app to track mood
+
+---
+
+## Upcoming Features
 
 ### Phase 5: Project Closure
 **Planned Features:**
