@@ -225,13 +225,69 @@ Integrated mood tracking into navigation flow. Created MoodViewModel with state 
 
 ---
 
-## Upcoming Features
+## Phase 3: Visualization
 
-### Phase 3: Visualization
-**Planned Features:**
-- Mood history screen with list of past entries
-- Calendar view showing mood trends
-- Statistics and insights
+### feat: add mood history screen with animations
+**Branch**: `feature/mood-history`
+**Commit**: `8aacf9a`
+
+**Files Added:**
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/ui/viewmodel/HistoryViewModel.kt` - ViewModel for mood history data
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/ui/screens/HistoryScreen.kt` - History screen UI with animations
+
+**Description:**
+Created mood history visualization screen displaying all mood entries for the current user. Implemented HistoryViewModel to manage state and fetch mood entries from MoodRepository using Flow. Created HistoryScreen with LazyColumn displaying mood entries in chronological order (most recent first). Added staggered entrance animations using slideInVertically and fadeIn with delays for each item. Display includes emoji, mood name, formatted date in Spanish, and optional notes. Added empty state UI for when no entries exist.
+
+**Features:**
+- HistoryViewModel with StateFlow<HistoryUiState>
+- Reactive data loading with Flow from MoodRepository
+- LazyColumn with itemsIndexed for list display
+- Animated entrance for each item (400ms slide + fade)
+- Staggered animation with 50ms delay per item
+- Color-coded cards matching MoodType colors
+- Date formatting in Spanish (SimpleDateFormat)
+- Empty state with icon and message
+- Loading state with CircularProgressIndicator
+- Error handling with error messages
+- TopAppBar with back navigation
+
+**UI Components:**
+- HistoryScreen: Main screen composable with Scaffold
+- MoodHistoryList: LazyColumn with animated items
+- MoodHistoryCard: Individual mood entry card
+- EmptyHistoryState: Empty state display
+
+---
+
+### feat: integrate history screen into navigation
+**Branch**: `feature/mood-history`
+**Commit**: `1dce99a`
+
+**Files Modified:**
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/navigation/Navigation.kt` - Added History route
+- `app/src/main/java/cl/duoc/dsy1105/moodtracker/ui/screens/HomeScreen.kt` - Added "Ver historial" button
+
+**Description:**
+Integrated history screen into app navigation flow. Added History route to navigation sealed class and created composable route with HistoryViewModel integration. Updated HomeScreen to include "Ver historial" button between "Track Mood" and "Logout" buttons. Connected navigation callbacks to enable seamless flow from home to history and back.
+
+**Features:**
+- History route in navigation graph
+- HistoryViewModel lifecycle management via viewModel()
+- StateFlow collection for reactive UI updates
+- Back navigation from history to home
+- New "Ver historial" button on HomeScreen
+- Maintains user session throughout navigation
+
+**Navigation Flow:**
+1. User clicks "Ver historial" on HomeScreen
+2. Navigate to HistoryScreen
+3. HistoryViewModel loads mood entries for current user
+4. Display entries with animations
+5. User can navigate back to HomeScreen
+
+---
+
+## Upcoming Features
 
 ### Phase 4: Native Resources
 **Planned Features:**
