@@ -13,7 +13,8 @@ import cl.duoc.dsy1105.moodtracker.ui.theme.MoodTrackerTheme
 fun HomeScreen(
     userEmail: String = "",
     onLogout: () -> Unit = {},
-    onTrackMood: () -> Unit = {}
+    onTrackMood: () -> Unit = {},
+    onViewHistory: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -45,6 +46,15 @@ fun HomeScreen(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Registrar estado de ánimo")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedButton(
+            onClick = onViewHistory,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Ver historial")
         }
 
         Spacer(modifier = Modifier.height(16.dp))

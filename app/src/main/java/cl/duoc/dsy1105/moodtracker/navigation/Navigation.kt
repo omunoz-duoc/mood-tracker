@@ -16,10 +16,12 @@ import cl.duoc.dsy1105.moodtracker.data.local.AppDatabase
 import cl.duoc.dsy1105.moodtracker.data.local.SessionManager
 import cl.duoc.dsy1105.moodtracker.data.repository.UserRepository
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.duoc.dsy1105.moodtracker.ui.screens.HistoryScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.HomeScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.LoginScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.MoodSelectionScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.RegisterScreen
+import cl.duoc.dsy1105.moodtracker.ui.viewmodel.HistoryViewModel
 import cl.duoc.dsy1105.moodtracker.ui.viewmodel.MoodViewModel
 import kotlinx.coroutines.launch
 
@@ -28,6 +30,7 @@ sealed class Screen(val route: String) {
     object Register : Screen("register")
     object Home : Screen("home")
     object MoodSelection : Screen("mood_selection")
+    object History : Screen("history")
 }
 
 @Composable
@@ -95,6 +98,9 @@ fun MoodTrackerNavigation() {
                 },
                 onTrackMood = {
                     navController.navigate(Screen.MoodSelection.route)
+                },
+                onViewHistory = {
+                    navController.navigate(Screen.History.route)
                 }
             )
         }
@@ -114,6 +120,20 @@ fun MoodTrackerNavigation() {
                 onMoodSelected = { moodType, note ->
                     moodViewModel.saveMoodEntry(moodType, note)
                 },
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.History.route) {
+            val historyViewModel: HistoryViewModel = viewModel { HistoryViewModel(context) }
+            val uiState by historyViewModel.uiState.collectAsState()
+
+            HistoryScreen(
+                moodEntries = uiState.moodEntries,
+                isLoading = uiState.isLoading,
+                errorMessage = uiState.errorMessage,
                 onNavigateBack = {
                     navController.popBackStack()
                 }
