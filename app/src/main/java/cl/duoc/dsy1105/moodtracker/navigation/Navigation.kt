@@ -59,6 +59,9 @@ fun MoodTrackerNavigation() {
             RegisterScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onRegistrationSuccess = {
+                    navController.popBackStack()
                 }
             )
         }
