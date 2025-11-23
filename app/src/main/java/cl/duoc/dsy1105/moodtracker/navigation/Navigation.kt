@@ -20,6 +20,7 @@ import cl.duoc.dsy1105.moodtracker.notifications.NotificationHelper
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.dsy1105.moodtracker.ui.screens.HistoryScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.HomeScreen
+import cl.duoc.dsy1105.moodtracker.ui.screens.LoadingScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.LoginScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.MoodSelectionScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.RegisterScreen
@@ -28,6 +29,7 @@ import cl.duoc.dsy1105.moodtracker.ui.viewmodel.MoodViewModel
 import kotlinx.coroutines.launch
 
 sealed class Screen(val route: String) {
+    object Loading : Screen("loading")
     object Login : Screen("login")
     object Register : Screen("register")
     object Home : Screen("home")
@@ -57,8 +59,19 @@ fun MoodTrackerNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = if (isLoggedIn) Screen.Home.route else Screen.Login.route
+        startDestination = Screen.Loading.route
     ) {
+        composable(Screen.Loading.route) {
+            LoadingScreen(
+                onNavigateToNext = {
+                    val destination = if (isLoggedIn) Screen.Home.route else Screen.Login.route
+                    navController.navigate(destination) {
+                        popUpTo(Screen.Loading.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Screen.Login.route) {
             LoginScreen(
                 onNavigateToRegister = {
