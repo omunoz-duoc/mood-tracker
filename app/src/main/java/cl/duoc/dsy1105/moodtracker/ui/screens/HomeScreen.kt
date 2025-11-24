@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -161,12 +162,15 @@ fun MoodSelectionSection(onMoodSelected: (String) -> Unit) {
         color = Color.White
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "¿Cómo te sientes hoy?",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -199,7 +203,7 @@ fun MoodOption(
     ) {
         Text(
             text = emoji,
-            style = MaterialTheme.typography.displayLarge
+            style = MaterialTheme.typography.displayMedium
         )
         if (label.isNotEmpty()) {
             Spacer(modifier = Modifier.height(4.dp))
