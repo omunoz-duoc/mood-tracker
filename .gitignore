@@ -19,8 +19,6 @@ local.properties
 
 # Claude Code configuration
 .claude/
-
 *.md
 !README.md
 !CLAUDE.md
-!FEATURES.md
