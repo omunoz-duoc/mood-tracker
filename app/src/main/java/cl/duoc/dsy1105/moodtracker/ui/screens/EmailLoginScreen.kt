@@ -108,7 +108,7 @@ fun EmailLoginScreen(
         ) {
             // Title with waving hand emoji
             Text(
-                text = "Welcome Back! 👋",
+                text = "Bienvenido! 👋",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -118,7 +118,7 @@ fun EmailLoginScreen(
 
             // Subtitle
             Text(
-                text = "Continue tracking your moods and earning badges.",
+                text = "Continúa registrando tus estados de ánimo y gana insignias de logros.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )
@@ -195,7 +195,7 @@ fun EmailLoginScreen(
 
             // Password label
             Text(
-                text = "Password",
+                text = "Constraseña",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground
@@ -215,7 +215,7 @@ fun EmailLoginScreen(
                         viewModel.clearError()
                     }
                 },
-                placeholder = { Text("Password") },
+                placeholder = { Text("Constraseña") },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Lock,
@@ -225,7 +225,7 @@ fun EmailLoginScreen(
                 trailingIcon = {
                     TextButton(onClick = { passwordVisible = !passwordVisible }) {
                         Text(
-                            text = if (passwordVisible) "Hide" else "Show",
+                            text = if (passwordVisible) "Ocultar" else "Mostrar",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -270,14 +270,14 @@ fun EmailLoginScreen(
                         )
                     )
                     Text(
-                        text = "Remember me",
+                        text = "Recuérdame",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }
                 TextButton(onClick = onForgotPassword) {
                     Text(
-                        text = "Forgot Password?",
+                        text = "Olvidó su contraseña?",
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary
@@ -289,7 +289,7 @@ fun EmailLoginScreen(
 
             // Or continue with
             Text(
-                text = "or continue with",
+                text = "o continúa con",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 modifier = Modifier.fillMaxWidth(),
@@ -337,17 +337,16 @@ fun EmailLoginScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Sign in button
             Button(
                 onClick = { handleLoginClick() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(bottom = 24.dp),
+                    .height(56.dp),
                 enabled = !uiState.isLoading,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.shapes.extraLarge
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
@@ -356,7 +355,7 @@ fun EmailLoginScreen(
                     )
                 } else {
                     Text(
-                        text = "Sign in",
+                        text = "Ingresar",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold
                     )
