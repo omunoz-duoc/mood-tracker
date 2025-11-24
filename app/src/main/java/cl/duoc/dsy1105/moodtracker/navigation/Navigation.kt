@@ -18,6 +18,7 @@ import cl.duoc.dsy1105.moodtracker.data.local.SessionManager
 import cl.duoc.dsy1105.moodtracker.data.repository.UserRepository
 import cl.duoc.dsy1105.moodtracker.notifications.NotificationHelper
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.duoc.dsy1105.moodtracker.ui.screens.AddDetailsScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.EmailLoginScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.HistoryScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.HomeScreen
@@ -39,6 +40,7 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object MoodSelection : Screen("mood_selection")
     object History : Screen("history")
+    object AddDetails : Screen("add_details")
 }
 
 @Composable
@@ -225,6 +227,17 @@ fun MoodTrackerNavigation() {
                 errorMessage = uiState.errorMessage,
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.AddDetails.route) {
+            AddDetailsScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onSave = { noteText, audioUri, imageUris ->
+                    // TODO: Save the details to database
                 }
             )
         }
