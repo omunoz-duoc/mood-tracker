@@ -357,11 +357,9 @@ fun MoodEntryCard(entry: MoodEntry) {
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier.fillMaxSize()
                             ) {
-                                Icon(
-                                    imageVector = Icons.Default.Image,
-                                    contentDescription = "Imagen adjunta",
-                                    modifier = Modifier.size(40.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                Text(
+                                    text = "📷",
+                                    style = MaterialTheme.typography.headlineLarge
                                 )
                             }
                         }
