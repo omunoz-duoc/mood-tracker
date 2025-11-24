@@ -57,7 +57,7 @@ fun HomeScreen(
             moodType = "Excelente",
             moodEmoji = "😄",
             date = Date(System.currentTimeMillis() - 2 * 60 * 60 * 1000),
-            tags = listOf("Trabajo", "Familia", "Ejercicio"),
+            tags = listOf("💼 Trabajo", "👪 Familia", "💪 Ejercicio"),
             note = "Tuve un día increíble hoy! Completé mi proyecto y salí a correr por la tarde.",
             hasAudio = true,
             imageCount = 2
@@ -66,7 +66,7 @@ fun HomeScreen(
             moodType = "Bien",
             moodEmoji = "🙂",
             date = Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000),
-            tags = listOf("Social", "Relax"),
+            tags = listOf("👥 Social", "😌 Relax"),
             note = "Día tranquilo con amigos. Vimos una película y charlamos mucho.",
             hasAudio = false,
             imageCount = 1
@@ -75,7 +75,7 @@ fun HomeScreen(
             moodType = "Meh",
             moodEmoji = "😐",
             date = Date(System.currentTimeMillis() - 48 * 60 * 60 * 1000),
-            tags = listOf("Trabajo", "Estrés"),
+            tags = listOf("💼 Trabajo", "😰 Estrés"),
             note = "Día normal, nada especial. Un poco cansado del trabajo.",
             hasAudio = false,
             imageCount = 0
@@ -291,7 +291,7 @@ fun MoodEntryCard(entry: MoodEntry) {
                             onClick = { },
                             label = { Text(tag) },
                             colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                                containerColor = Color.White
                             ),
                             shape = CircleShape
                         )
