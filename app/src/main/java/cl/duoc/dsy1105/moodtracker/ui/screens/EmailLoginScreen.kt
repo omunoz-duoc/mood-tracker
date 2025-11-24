@@ -3,16 +3,25 @@ package cl.duoc.dsy1105.moodtracker.ui.screens
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import cl.duoc.dsy1105.moodtracker.R
 import cl.duoc.dsy1105.moodtracker.domain.validators.LoginValidator
 import cl.duoc.dsy1105.moodtracker.domain.validators.ValidationResult
 import cl.duoc.dsy1105.moodtracker.ui.theme.MoodTrackerTheme
@@ -21,7 +30,9 @@ import cl.duoc.dsy1105.moodtracker.ui.viewmodel.LoginViewModel
 @Composable
 fun EmailLoginScreen(
     onNavigateBack: () -> Unit = {},
-    onLoginSuccess: () -> Unit = {}
+    onLoginSuccess: () -> Unit = {},
+    onForgotPassword: () -> Unit = {},
+    onSocialLogin: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
     val viewModel: LoginViewModel = viewModel { LoginViewModel(context) }
@@ -29,6 +40,8 @@ fun EmailLoginScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var rememberMe by remember { mutableStateOf(false) }
+    var passwordVisible by remember { mutableStateOf(false) }
     var emailValidation by remember { mutableStateOf<ValidationResult?>(null) }
     var passwordValidation by remember { mutableStateOf<ValidationResult?>(null) }
     var shouldShake by remember { mutableStateOf(false) }
@@ -74,18 +87,43 @@ fun EmailLoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .offset(x = offsetX.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .offset(x = offsetX.dp)
     ) {
-        Text(
-            text = "Iniciar Sesión",
-            style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
+        // Back arrow
+        IconButton(
+            onClick = onNavigateBack,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back"
+            )
+        }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            // Title with waving hand emoji
+            Text(
+                text = "Welcome Back! 👋",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Subtitle
+            Text(
+                text = "Continue tracking your moods and earning badges.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
 
         // Show error message from ViewModel
         if (uiState.errorMessage != null) {
@@ -105,8 +143,17 @@ fun EmailLoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Email field
-        Column(modifier = Modifier.fillMaxWidth()) {
+            // Email label
+            Text(
+                text = "Email",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Email field
             OutlinedTextField(
                 value = email,
                 onValueChange = {
@@ -118,42 +165,45 @@ fun EmailLoginScreen(
                         viewModel.clearError()
                     }
                 },
-                label = { Text("Email") },
+                placeholder = { Text("Email") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Email,
+                        contentDescription = "Email icon"
+                    )
+                },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 enabled = !uiState.isLoading,
                 isError = emailValidation?.isValid == false,
-                trailingIcon = {
-                    if (emailValidation?.isValid == false) {
-                        Icon(
-                            imageVector = Icons.Filled.Warning,
-                            contentDescription = "Error",
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
+                shape = MaterialTheme.shapes.medium,
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                )
             )
 
             if (emailValidation?.isValid == false) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, top = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = emailValidation?.errorMessage ?: "",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
+                Text(
+                    text = emailValidation?.errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Password field
-        Column(modifier = Modifier.fillMaxWidth()) {
+            // Password label
+            Text(
+                text = "Password",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Password field
             OutlinedTextField(
                 value = password,
                 onValueChange = {
@@ -165,63 +215,153 @@ fun EmailLoginScreen(
                         viewModel.clearError()
                     }
                 },
-                label = { Text("Contraseña") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                enabled = !uiState.isLoading,
-                isError = passwordValidation?.isValid == false,
+                placeholder = { Text("Password") },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Lock,
+                        contentDescription = "Password icon"
+                    )
+                },
                 trailingIcon = {
-                    if (passwordValidation?.isValid == false) {
-                        Icon(
-                            imageVector = Icons.Filled.Warning,
-                            contentDescription = "Error",
-                            tint = MaterialTheme.colorScheme.error
+                    TextButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Text(
+                            text = if (passwordVisible) "Hide" else "Show",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
-                }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                enabled = !uiState.isLoading,
+                isError = passwordValidation?.isValid == false,
+                shape = MaterialTheme.shapes.medium,
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                )
             )
 
             if (passwordValidation?.isValid == false) {
+                Text(
+                    text = passwordValidation?.errorMessage ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Remember me and Forgot Password row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Checkbox(
+                        checked = rememberMe,
+                        onCheckedChange = { rememberMe = it },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.colorScheme.primary
+                        )
+                    )
                     Text(
-                        text = passwordValidation?.errorMessage ?: "",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                        text = "Remember me",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+                TextButton(onClick = onForgotPassword) {
+                    Text(
+                        text = "Forgot Password?",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Button(
-            onClick = { handleLoginClick() },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !uiState.isLoading
-        ) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Iniciar sesión")
+            // Or continue with
+            Text(
+                text = "or continue with",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Social login icons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                IconButton(onClick = { onSocialLogin("google") }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.google),
+                        contentDescription = "Google",
+                        modifier = Modifier.size(32.dp),
+                        tint = Color.Unspecified
+                    )
+                }
+                IconButton(onClick = { onSocialLogin("apple") }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.apple),
+                        contentDescription = "Apple",
+                        modifier = Modifier.size(32.dp),
+                        tint = Color.Unspecified
+                    )
+                }
+                IconButton(onClick = { onSocialLogin("facebook") }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.facebook),
+                        contentDescription = "Facebook",
+                        modifier = Modifier.size(32.dp),
+                        tint = Color.Unspecified
+                    )
+                }
+                IconButton(onClick = { onSocialLogin("x") }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.x),
+                        contentDescription = "X",
+                        modifier = Modifier.size(32.dp),
+                        tint = Color.Unspecified
+                    )
+                }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
-        TextButton(
-            onClick = onNavigateBack,
-            enabled = !uiState.isLoading
-        ) {
-            Text("Volver")
+            // Sign in button
+            Button(
+                onClick = { handleLoginClick() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(bottom = 24.dp),
+                enabled = !uiState.isLoading,
+                shape = MaterialTheme.shapes.large
+            ) {
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text(
+                        text = "Sign in",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
         }
     }
 }
