@@ -3,6 +3,7 @@ package cl.duoc.dsy1105.moodtracker.data.local
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -15,6 +16,7 @@ class SessionManager(private val context: Context) {
 
     companion object {
         private val USER_ID_KEY = longPreferencesKey("user_id")
+        private val ONBOARDING_COMPLETED_KEY = booleanPreferencesKey("onboarding_completed")
     }
 
     /**
@@ -50,4 +52,21 @@ class SessionManager(private val context: Context) {
             preferences.remove(USER_ID_KEY)
         }
     }
+
+    /**
+     * Mark onboarding as completed
+     */
+    suspend fun setOnboardingCompleted() {
+        context.dataStore.edit { preferences ->
+            preferences[ONBOARDING_COMPLETED_KEY] = true
+        }
+    }
+
+    /**
+     * Check if onboarding has been completed
+     */
+    val onboardingCompletedFlow: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[ONBOARDING_COMPLETED_KEY] ?: false
+        }
 }
