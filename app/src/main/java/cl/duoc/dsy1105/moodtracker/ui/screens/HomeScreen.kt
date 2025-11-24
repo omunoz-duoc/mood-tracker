@@ -292,7 +292,8 @@ fun MoodEntryCard(entry: MoodEntry) {
                             label = { Text(tag) },
                             colors = AssistChipDefaults.assistChipColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
+                            ),
+                            shape = CircleShape
                         )
                     }
                 }
