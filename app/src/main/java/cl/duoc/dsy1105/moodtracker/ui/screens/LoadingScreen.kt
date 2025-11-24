@@ -1,5 +1,6 @@
 package cl.duoc.dsy1105.moodtracker.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,11 +17,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import cl.duoc.dsy1105.moodtracker.ui.theme.LoadingGreen
+import cl.duoc.dsy1105.moodtracker.R
+import cl.duoc.dsy1105.moodtracker.ui.theme.PrimaryGreen
 import cl.duoc.dsy1105.moodtracker.ui.theme.MoodTrackerTheme
 import kotlinx.coroutines.delay
 
@@ -37,26 +40,19 @@ fun LoadingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(LoadingGreen),
+            .background(PrimaryGreen),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Logo placeholder (will be replaced with actual logo)
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .background(Color.White, shape = androidx.compose.foundation.shape.CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                // Placeholder for logo image
-                Text(
-                    text = "🎭",
-                    fontSize = 60.sp
-                )
-            }
+            // App logo
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Muud App Logo",
+                modifier = Modifier.size(120.dp)
+            )
 
             Spacer(modifier = Modifier.height(24.dp))
 
