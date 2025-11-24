@@ -127,8 +127,16 @@ fun MoodTrackerNavigation() {
                 onNavigateBack = {
                     navController.popBackStack()
                 },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
+                    }
+                },
                 onRegistrationSuccess = {
                     navController.popBackStack()
+                },
+                onSocialRegister = { provider ->
+                    // TODO: Implement social registration for provider
                 }
             )
         }
