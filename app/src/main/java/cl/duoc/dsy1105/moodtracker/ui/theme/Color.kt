@@ -31,7 +31,7 @@ val Surface = Color(0xFFFFFBFE)             // Off-white surface
 val OnSurface = Color(0xFF1C1B1F)           // Dark text on surface
 val SurfaceVariant = Color(0xFFE7E0EC)      // Variant surface
 val OnSurfaceVariant = Color(0xFF49454F)    // Text on variant surface
-val Background = Color(0xFFFFFBFE)          // Background color
+val Background = Color(0xFFF5F5F5)          // Light gray background
 val OnBackground = Color(0xFF1C1B1F)        // Text on background
 
 // Outline & Borders
