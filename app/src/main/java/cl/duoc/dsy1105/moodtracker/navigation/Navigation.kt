@@ -184,6 +184,12 @@ fun MoodTrackerNavigation() {
                             notificationHelper.cancelDailyNotification()
                         }
                     }
+                },
+                onMoodSelected = { moodType ->
+                    navController.navigate(Screen.MoodSelection.route)
+                },
+                onSearchClick = {
+                    // TODO: Navigate to search screen
                 }
             )
         }
