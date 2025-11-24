@@ -115,7 +115,7 @@ fun RegisterScreen(
         ) {
             // Title with sparkle emoji
             Text(
-                text = "Join Lumio Today ✨",
+                text = "Únete a Muud Hoy ✨",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
@@ -125,7 +125,7 @@ fun RegisterScreen(
 
             // Subtitle
             Text(
-                text = "Start tracking your moods and earn achievement badges.",
+                text = "Empieza a registrar tus estados de ánimo y gana insignias de logros.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )
@@ -202,7 +202,7 @@ fun RegisterScreen(
 
             // Password label
             Text(
-                text = "Password",
+                text = "Contraseña",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onBackground
@@ -226,7 +226,7 @@ fun RegisterScreen(
                         viewModel.clearError()
                     }
                 },
-                placeholder = { Text("Password") },
+                placeholder = { Text("Contraseña") },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Lock,
@@ -236,7 +236,7 @@ fun RegisterScreen(
                 trailingIcon = {
                     TextButton(onClick = { passwordVisible = !passwordVisible }) {
                         Text(
-                            text = if (passwordVisible) "Hide" else "Show",
+                            text = if (passwordVisible) "Ocultar" else "Mostrar",
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -278,10 +278,11 @@ fun RegisterScreen(
                 )
                 Text(
                     text = buildAnnotatedString {
-                        append("I agree to Lumio ")
+                        append("Acepto los ")
                         withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                            append("Terms & Conditions.")
+                            append("Términos y Condiciones")
                         }
+                        append(" de Muud.")
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(start = 4.dp)
@@ -296,12 +297,12 @@ fun RegisterScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "Already have an account? ",
+                    text = "Ya tienes una cuenta? ",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = "Sign in",
+                    text = "Ingresa",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary,
@@ -313,7 +314,7 @@ fun RegisterScreen(
 
             // Or continue with
             Text(
-                text = "or continue with",
+                text = "o continúa con",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
                 modifier = Modifier.fillMaxWidth(),
@@ -361,17 +362,16 @@ fun RegisterScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
 
             // Sign up button
             Button(
                 onClick = { handleRegisterClick() },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(bottom = 24.dp),
+                    .height(56.dp),
                 enabled = !uiState.isLoading && agreedToTerms,
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.shapes.extraLarge
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
@@ -380,7 +380,7 @@ fun RegisterScreen(
                     )
                 } else {
                     Text(
-                        text = "Sign up",
+                        text = "Registrarse",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold
                     )
