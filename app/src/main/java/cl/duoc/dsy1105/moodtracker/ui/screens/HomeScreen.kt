@@ -153,29 +153,35 @@ fun MoodSelectionSection(onMoodSelected: (String) -> Unit) {
         "😢" to "Pésimo"
     )
 
-    Column(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp),
+        shape = MaterialTheme.shapes.medium,
+        color = Color.White
     ) {
-        Text(
-            text = "¿Cómo te sientes hoy?",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            moods.forEach { (emoji, label) ->
-                MoodOption(
-                    emoji = emoji,
-                    label = label,
-                    onClick = { onMoodSelected(label) }
-                )
+            Text(
+                text = "¿Cómo te sientes hoy?",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                moods.forEach { (emoji, label) ->
+                    MoodOption(
+                        emoji = emoji,
+                        label = "",
+                        onClick = { onMoodSelected(label) }
+                    )
+                }
             }
         }
     }
@@ -191,27 +197,18 @@ fun MoodOption(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.clickable(onClick = onClick)
     ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.size(56.dp)
-        ) {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Text(
-                    text = emoji,
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            text = emoji,
+            style = MaterialTheme.typography.displayLarge
         )
+        if (label.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
