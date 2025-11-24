@@ -225,7 +225,8 @@ fun MoodEntryCard(entry: MoodEntry) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(
             modifier = Modifier
@@ -313,7 +314,7 @@ fun MoodEntryCard(entry: MoodEntry) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Surface(
                     shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    color = Color.White,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -351,7 +352,7 @@ fun MoodEntryCard(entry: MoodEntry) {
                     repeat(entry.imageCount) {
                         Surface(
                             shape = MaterialTheme.shapes.small,
-                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            color = Color.White,
                             modifier = Modifier.size(80.dp)
                         ) {
                             Box(
