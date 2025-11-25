@@ -192,6 +192,9 @@ fun MoodTrackerNavigation() {
                 },
                 onSearchClick = {
                     // TODO: Navigate to search screen
+                },
+                onAddDetails = {
+                    navController.navigate(Screen.AddDetails.route)
                 }
             )
         }
