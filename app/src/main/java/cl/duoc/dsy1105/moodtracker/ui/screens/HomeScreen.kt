@@ -50,8 +50,7 @@ fun HomeScreen(
     onViewHistory: () -> Unit = {},
     onToggleNotifications: (Boolean) -> Unit = {},
     onMoodSelected: (String) -> Unit = {},
-    onSearchClick: () -> Unit = {},
-    onAddDetails: () -> Unit = {}
+    onSearchClick: () -> Unit = {}
 ) {
     val sampleMoodEntries = listOf(
         MoodEntry(
@@ -122,10 +121,7 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             // Mood Selection Section
-            MoodSelectionSection(
-                onMoodSelected = onMoodSelected,
-                onAddDetails = onAddDetails
-            )
+            MoodSelectionSection(onMoodSelected = onMoodSelected)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -150,8 +146,7 @@ fun HomeScreen(
 
 @Composable
 fun MoodSelectionSection(
-    onMoodSelected: (String) -> Unit,
-    onAddDetails: () -> Unit = {}
+    onMoodSelected: (String) -> Unit
 ) {
     val moods = listOf(
         "😄" to "Excelente",
@@ -193,19 +188,6 @@ fun MoodSelectionSection(
                         onClick = { onMoodSelected(label) }
                     )
                 }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            TextButton(
-                onClick = onAddDetails,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "Agregar más detalles",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
             }
         }
     }

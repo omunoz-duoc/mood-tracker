@@ -24,10 +24,16 @@ data class MoodEntry(
     val userId: Long,
     val moodType: String, // Store enum name as string
     val note: String? = null,
+    val audioUri: String? = null,
+    val imageUris: String? = null, // Comma-separated list of image URIs
     val date: Long = System.currentTimeMillis()
 ) {
     fun toMoodType(): MoodType {
         return MoodType.valueOf(moodType)
+    }
+
+    fun getImageUriList(): List<String> {
+        return imageUris?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
     }
 
     companion object {
@@ -36,6 +42,22 @@ data class MoodEntry(
                 userId = userId,
                 moodType = moodType.name,
                 note = note
+            )
+        }
+
+        fun createWithDetails(
+            userId: Long,
+            moodType: MoodType,
+            note: String? = null,
+            audioUri: String? = null,
+            imageUris: List<String>? = null
+        ): MoodEntry {
+            return MoodEntry(
+                userId = userId,
+                moodType = moodType.name,
+                note = note,
+                audioUri = audioUri,
+                imageUris = imageUris?.joinToString(",")
             )
         }
     }

@@ -33,6 +33,7 @@ import java.util.*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddDetailsScreen(
+    moodType: String = "",
     onNavigateBack: () -> Unit = {},
     onSave: (String, Uri?, List<Uri>) -> Unit = { _, _, _ -> }
 ) {
@@ -209,15 +210,42 @@ fun AddDetailsScreen(
         ) {
             // Title
             Text(
-                text = "Add more details",
+                text = "Añadir más detalles",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
 
+            // Selected Mood Display
+            if (moodType.isNotEmpty()) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Estado de ánimo: ",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = moodType,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
             // Quick Note Section
             Text(
-                text = "Quick Note",
+                text = "Nota rápida",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -226,7 +254,7 @@ fun AddDetailsScreen(
             OutlinedTextField(
                 value = noteText,
                 onValueChange = { noteText = it },
-                placeholder = { Text("Add your note...") },
+                placeholder = { Text("Agrega tu nota...") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(120.dp),
@@ -241,7 +269,7 @@ fun AddDetailsScreen(
 
             // Voice Memo Section
             Text(
-                text = "Voice Memo",
+                text = "Nota de voz",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -273,7 +301,7 @@ fun AddDetailsScreen(
                         modifier = Modifier.padding(end = 8.dp)
                     )
                     Text(
-                        text = if (isRecording) "Recording... Tap to Stop" else "Tap to Record",
+                        text = if (isRecording) "grabando... Tocar para parar" else "Tocar para grabar",
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -281,7 +309,7 @@ fun AddDetailsScreen(
 
             if (audioUri != null) {
                 Text(
-                    text = "✓ Audio recorded",
+                    text = "✓ Audio grabado",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 8.dp)
@@ -322,7 +350,7 @@ fun AddDetailsScreen(
                             modifier = Modifier.padding(end = 8.dp)
                         )
                         Text(
-                            text = "Camera",
+                            text = "Cámara",
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -348,7 +376,7 @@ fun AddDetailsScreen(
                             modifier = Modifier.padding(end = 8.dp)
                         )
                         Text(
-                            text = "Gallery",
+                            text = "Galería",
                             style = MaterialTheme.typography.bodyLarge
                         )
                     }
@@ -381,7 +409,7 @@ fun AddDetailsScreen(
                 )
             ) {
                 Text(
-                    text = "Save",
+                    text = "Guardar",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.SemiBold
                 )

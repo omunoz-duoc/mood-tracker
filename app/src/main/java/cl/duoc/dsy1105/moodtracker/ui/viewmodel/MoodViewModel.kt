@@ -1,6 +1,7 @@
 package cl.duoc.dsy1105.moodtracker.ui.viewmodel
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cl.duoc.dsy1105.moodtracker.data.local.AppDatabase
@@ -71,5 +72,66 @@ class MoodViewModel(context: Context) : ViewModel() {
 
     fun resetSaveSuccess() {
         _uiState.value = _uiState.value.copy(isSaveSuccessful = false)
+    }
+
+    fun saveMoodEntryWithDetails(
+        moodType: String,
+        note: String,
+        audioUri: Uri?,
+        imageUris: List<Uri>
+    ) {
+        viewModelScope.launch {
+            _uiState.value = MoodUiState(isLoading = true)
+
+            try {
+                // Get current user ID from session
+                val userId = sessionManager.userIdFlow.firstOrNull()
+
+                if (userId == null) {
+                    _uiState.value = MoodUiState(
+                        isLoading = false,
+                        errorMessage = "No se encontró sesión activa"
+                    )
+                    return@launch
+                }
+
+                // Map Spanish mood label to MoodType enum
+                val mappedMoodType = mapMoodLabelToType(moodType)
+
+                // Convert URIs to strings
+                val audioUriString = audioUri?.toString()
+                val imageUriStrings = imageUris.map { it.toString() }
+
+                // Save mood entry with details
+                moodRepository.saveMoodEntryWithDetails(
+                    userId = userId,
+                    moodType = mappedMoodType,
+                    note = note.ifBlank { null },
+                    audioUri = audioUriString,
+                    imageUris = imageUriStrings.ifEmpty { null }
+                )
+
+                _uiState.value = MoodUiState(
+                    isLoading = false,
+                    isSaveSuccessful = true
+                )
+            } catch (e: Exception) {
+                _uiState.value = MoodUiState(
+                    isLoading = false,
+                    errorMessage = "Error al guardar: ${e.message}"
+                )
+            }
+        }
+    }
+
+    private fun mapMoodLabelToType(label: String): MoodType {
+        return when (label) {
+            "Excelente" -> MoodType.EXCITED
+            "Bien" -> MoodType.HAPPY
+            "Meh" -> MoodType.CALM
+            "Mal" -> MoodType.ANXIOUS
+            "Pésimo" -> MoodType.SAD
+            else -> MoodType.CALM // Default fallback
+        }
     }
 }

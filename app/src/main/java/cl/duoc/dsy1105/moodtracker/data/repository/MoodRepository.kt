@@ -16,6 +16,20 @@ class MoodRepository(private val moodDao: MoodDao) {
     }
 
     /**
+     * Save a new mood entry with details (audio and images)
+     */
+    suspend fun saveMoodEntryWithDetails(
+        userId: Long,
+        moodType: MoodType,
+        note: String? = null,
+        audioUri: String? = null,
+        imageUris: List<String>? = null
+    ): Long {
+        val moodEntry = MoodEntry.createWithDetails(userId, moodType, note, audioUri, imageUris)
+        return moodDao.insertMoodEntry(moodEntry)
+    }
+
+    /**
      * Get all mood entries for a user as a Flow (live updates)
      */
     fun getAllMoodEntriesForUser(userId: Long): Flow<List<MoodEntry>> {

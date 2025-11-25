@@ -103,15 +103,33 @@ sealed class Screen(val route: String) {
 import cl.duoc.dsy1105.moodtracker.ui.screens.AddDetailsScreen
 ```
 
-#### Added Composable Route:
+#### Updated HomeScreen Navigation:
 ```kotlin
-composable(Screen.AddDetails.route) {
+onMoodSelected = { moodType ->
+    navController.navigate("${Screen.AddDetails.route}/$moodType")
+}
+```
+
+#### Added Composable Route with Database Persistence:
+```kotlin
+composable("${Screen.AddDetails.route}/{moodType}") { backStackEntry ->
+    val moodType = backStackEntry.arguments?.getString("moodType") ?: ""
+    val moodViewModel: MoodViewModel = viewModel { MoodViewModel(context) }
+
     AddDetailsScreen(
+        moodType = moodType,
         onNavigateBack = {
             navController.popBackStack()
         },
         onSave = { noteText, audioUri, imageUris ->
-            // TODO: Save the details to database
+            // Save mood entry with details to database
+            moodViewModel.saveMoodEntryWithDetails(
+                moodType = moodType,
+                note = noteText,
+                audioUri = audioUri,
+                imageUris = imageUris
+            )
+            navController.popBackStack()
         }
     )
 }
@@ -259,31 +277,164 @@ mediaRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 - **Not Exported**: Provider not accessible to other apps
 - **Paths**: Defined in `file_paths.xml` for cache directory
 
-## Future Enhancements
+## Database Integration
 
-### Database Integration
-Currently the `onSave` callback has a TODO comment. Future implementation should:
-1. Create a MoodDetails entity with relationships to MoodEntry
-2. Store file URIs in database
-3. Copy files from cache to permanent storage
-4. Implement file cleanup on entry deletion
+### Implementation Completed
+The `onSave` callback now persists all mood entry details to the SQLite database using Room.
 
-### Suggested Database Schema
+### Updated Database Schema
+
+#### MoodEntry Entity (Version 3)
+**Location**: `app/src/main/java/cl/duoc/dsy1105/moodtracker/data/local/entities/MoodEntry.kt`
+
 ```kotlin
-@Entity(tableName = "mood_details")
-data class MoodDetails(
+@Entity(tableName = "mood_entries")
+data class MoodEntry(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    @ColumnInfo(name = "mood_entry_id")
-    val moodEntryId: Long,
-    @ColumnInfo(name = "note_text")
-    val noteText: String?,
-    @ColumnInfo(name = "audio_uri")
-    val audioUri: String?,
-    @ColumnInfo(name = "image_uris")
-    val imageUris: String? // JSON array of URIs
-)
+    val userId: Long,
+    val moodType: String,
+    val note: String? = null,
+    val audioUri: String? = null,              // NEW: Audio recording URI
+    val imageUris: String? = null,             // NEW: Comma-separated image URIs
+    val date: Long = System.currentTimeMillis()
+) {
+    fun toMoodType(): MoodType {
+        return MoodType.valueOf(moodType)
+    }
+
+    fun getImageUriList(): List<String> {
+        return imageUris?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
+    }
+
+    companion object {
+        fun createWithDetails(
+            userId: Long,
+            moodType: MoodType,
+            note: String? = null,
+            audioUri: String? = null,
+            imageUris: List<String>? = null
+        ): MoodEntry {
+            return MoodEntry(
+                userId = userId,
+                moodType = moodType.name,
+                note = note,
+                audioUri = audioUri,
+                imageUris = imageUris?.joinToString(",")
+            )
+        }
+    }
+}
 ```
+
+### MoodRepository Updates
+**Location**: `app/src/main/java/cl/duoc/dsy1105/moodtracker/data/repository/MoodRepository.kt`
+
+**Added Method**:
+```kotlin
+suspend fun saveMoodEntryWithDetails(
+    userId: Long,
+    moodType: MoodType,
+    note: String? = null,
+    audioUri: String? = null,
+    imageUris: List<String>? = null
+): Long {
+    val moodEntry = MoodEntry.createWithDetails(userId, moodType, note, audioUri, imageUris)
+    return moodDao.insertMoodEntry(moodEntry)
+}
+```
+
+### MoodViewModel Updates
+**Location**: `app/src/main/java/cl/duoc/dsy1105/moodtracker/ui/viewmodel/MoodViewModel.kt`
+
+**Added Method**:
+```kotlin
+fun saveMoodEntryWithDetails(
+    moodType: String,
+    note: String,
+    audioUri: Uri?,
+    imageUris: List<Uri>
+) {
+    viewModelScope.launch {
+        _uiState.value = MoodUiState(isLoading = true)
+
+        try {
+            val userId = sessionManager.userIdFlow.firstOrNull()
+
+            if (userId == null) {
+                _uiState.value = MoodUiState(
+                    isLoading = false,
+                    errorMessage = "No se encontró sesión activa"
+                )
+                return@launch
+            }
+
+            // Map Spanish mood label to MoodType enum
+            val mappedMoodType = mapMoodLabelToType(moodType)
+
+            // Convert URIs to strings
+            val audioUriString = audioUri?.toString()
+            val imageUriStrings = imageUris.map { it.toString() }
+
+            // Save mood entry with details
+            moodRepository.saveMoodEntryWithDetails(
+                userId = userId,
+                moodType = mappedMoodType,
+                note = note.ifBlank { null },
+                audioUri = audioUriString,
+                imageUris = imageUriStrings.ifEmpty { null }
+            )
+
+            _uiState.value = MoodUiState(
+                isLoading = false,
+                isSaveSuccessful = true
+            )
+        } catch (e: Exception) {
+            _uiState.value = MoodUiState(
+                isLoading = false,
+                errorMessage = "Error al guardar: ${e.message}"
+            )
+        }
+    }
+}
+```
+
+**Mood Label Mapping**:
+The ViewModel includes a mapping function to convert Spanish mood labels from HomeScreen to MoodType enum:
+- "Excelente" → EXCITED
+- "Bien" → HAPPY
+- "Meh" → CALM
+- "Mal" → ANXIOUS
+- "Pésimo" → SAD
+
+### AppDatabase Updates
+**Location**: `app/src/main/java/cl/duoc/dsy1105/moodtracker/data/local/AppDatabase.kt`
+
+**Database Version**: Updated from version 2 to version 3
+- Uses `fallbackToDestructiveMigration()` which recreates the database on schema changes
+
+### Data Flow
+1. User selects a mood emoticon in HomeScreen
+2. Navigation passes moodType parameter to AddDetailsScreen
+3. User adds note, audio recording, and/or images
+4. User taps "Guardar" (Save) button
+5. AddDetailsScreen calls onSave callback with all data
+6. MoodViewModel.saveMoodEntryWithDetails:
+   - Gets current user ID from SessionManager
+   - Maps Spanish mood label to MoodType enum
+   - Converts Uri objects to strings
+   - Calls repository method
+7. MoodRepository creates MoodEntry with all details
+8. MoodDao inserts entry into SQLite database
+9. User is navigated back to HomeScreen
+
+### Data Storage Format
+- **audioUri**: Single URI string (e.g., `content://cl.duoc.dsy1105.moodtracker.fileprovider/audio/audio_20250124_143022.3gp`)
+- **imageUris**: Comma-separated URI strings (e.g., `content://media/external/images/1,content://media/external/images/2`)
+- **note**: Plain text string
+- **date**: Unix timestamp (milliseconds since epoch)
+
+## Future Enhancements
 
 ### Additional Features to Consider
 - [ ] Audio playback preview before saving
@@ -342,6 +493,20 @@ TextButton(onClick = {
 }
 ```
 
+## Navigation Flow
+
+### From HomeScreen to AddDetailsScreen
+1. User clicks any mood emoticon in MoodSelectionSection (😄, 🙂, 😐, 😟, 😢)
+2. HomeScreen's `onMoodSelected` callback is triggered with mood label
+3. Navigation navigates to `add_details/{moodType}` route
+4. AddDetailsScreen displays with selected mood indicator
+
+### From AddDetailsScreen back to HomeScreen
+1. User adds optional details (note, audio, images)
+2. User taps "Guardar" button
+3. All data is saved to SQLite database via MoodViewModel
+4. Navigation pops back stack to return to HomeScreen
+
 ## Summary
 
 The Add Details Screen provides a comprehensive interface for users to enrich their mood entries with:
@@ -349,4 +514,12 @@ The Add Details Screen provides a comprehensive interface for users to enrich th
 - **Voice memos**: Recorded audio reflections
 - **Photos**: Visual memories from camera or gallery
 
-All functionality is fully implemented with proper permission handling, error management, and user feedback. The screen follows Material 3 design guidelines and integrates seamlessly with the app's navigation structure.
+All functionality is fully implemented with:
+- ✅ Proper permission handling
+- ✅ Error management and user feedback
+- ✅ SQLite database persistence using Room
+- ✅ Material 3 design guidelines
+- ✅ Seamless navigation integration
+- ✅ Session-based user authentication
+
+**Database**: All mood entries with details are persisted to SQLite database (version 3) with proper foreign key relationships and cascade delete.

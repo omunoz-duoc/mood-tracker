@@ -188,13 +188,10 @@ fun MoodTrackerNavigation() {
                     }
                 },
                 onMoodSelected = { moodType ->
-                    navController.navigate(Screen.MoodSelection.route)
+                    navController.navigate("${Screen.AddDetails.route}/$moodType")
                 },
                 onSearchClick = {
                     // TODO: Navigate to search screen
-                },
-                onAddDetails = {
-                    navController.navigate(Screen.AddDetails.route)
                 }
             )
         }
@@ -234,13 +231,24 @@ fun MoodTrackerNavigation() {
             )
         }
 
-        composable(Screen.AddDetails.route) {
+        composable("${Screen.AddDetails.route}/{moodType}") { backStackEntry ->
+            val moodType = backStackEntry.arguments?.getString("moodType") ?: ""
+            val moodViewModel: MoodViewModel = viewModel { MoodViewModel(context) }
+
             AddDetailsScreen(
+                moodType = moodType,
                 onNavigateBack = {
                     navController.popBackStack()
                 },
                 onSave = { noteText, audioUri, imageUris ->
-                    // TODO: Save the details to database
+                    // Save mood entry with details to database
+                    moodViewModel.saveMoodEntryWithDetails(
+                        moodType = moodType,
+                        note = noteText,
+                        audioUri = audioUri,
+                        imageUris = imageUris
+                    )
+                    navController.popBackStack()
                 }
             )
         }
