@@ -23,10 +23,29 @@ class MoodRepository(private val moodDao: MoodDao) {
         moodType: MoodType,
         note: String? = null,
         audioUri: String? = null,
+        audioDuration: Int? = null,
         imageUris: List<String>? = null
     ): Long {
-        val moodEntry = MoodEntry.createWithDetails(userId, moodType, note, audioUri, imageUris)
+        val moodEntry = MoodEntry.createWithDetails(userId, moodType, note, audioUri, audioDuration, imageUris)
         return moodDao.insertMoodEntry(moodEntry)
+    }
+
+    /**
+     * Update an existing mood entry
+     */
+    suspend fun updateMoodEntry(moodEntry: MoodEntry) {
+        moodDao.updateMoodEntry(moodEntry)
+    }
+
+    /**
+     * Update mood entry note
+     */
+    suspend fun updateMoodEntryNote(entryId: Long, newNote: String) {
+        val entry = moodDao.getMoodEntryById(entryId)
+        entry?.let {
+            val updatedEntry = it.copy(note = newNote)
+            moodDao.updateMoodEntry(updatedEntry)
+        }
     }
 
     /**

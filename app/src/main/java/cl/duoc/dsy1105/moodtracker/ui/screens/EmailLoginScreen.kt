@@ -1,6 +1,8 @@
 package cl.duoc.dsy1105.moodtracker.ui.screens
 
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -32,11 +34,12 @@ fun EmailLoginScreen(
     onNavigateBack: () -> Unit = {},
     onLoginSuccess: () -> Unit = {},
     onForgotPassword: () -> Unit = {},
-    onSocialLogin: (String) -> Unit = {}
+    onSocialLogin: (String) -> Unit = {},
+    viewModel: LoginViewModel? = null
 ) {
     val context = LocalContext.current
-    val viewModel: LoginViewModel = viewModel { LoginViewModel(context) }
-    val uiState by viewModel.uiState.collectAsState()
+    val actualViewModel: LoginViewModel = viewModel ?: viewModel { LoginViewModel(context) }
+    val uiState by actualViewModel.uiState.collectAsState()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -46,28 +49,38 @@ fun EmailLoginScreen(
     var passwordValidation by remember { mutableStateOf<ValidationResult?>(null) }
     var shouldShake by remember { mutableStateOf(false) }
 
+    // Screen visibility animation
+    var visible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+
     // Handle login success navigation
     LaunchedEffect(uiState.isLoginSuccessful) {
         if (uiState.isLoginSuccessful) {
             onLoginSuccess()
-            viewModel.resetLoginSuccess()
+            actualViewModel.resetLoginSuccess()
         }
     }
 
     // Shake animation
     val shakeOffset by animateFloatAsState(
         targetValue = if (shouldShake) 1f else 0f,
-        animationSpec = repeatable(
-            iterations = 3,
-            animation = tween(durationMillis = 50),
-            repeatMode = RepeatMode.Reverse
-        ),
+        animationSpec = if (shouldShake) {
+            repeatable(
+                iterations = 4,
+                animation = tween(durationMillis = 40, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            )
+        } else {
+            tween(durationMillis = 0)
+        },
         finishedListener = { shouldShake = false },
         label = "shake"
     )
 
     val offsetX = if (shouldShake) {
-        (shakeOffset * 10f) * if (shakeOffset > 0.5f) 1f else -1f
+        if (shakeOffset > 0.5f) 10f else -10f
     } else {
         0f
     }
@@ -78,17 +91,24 @@ fun EmailLoginScreen(
         passwordValidation = validation.passwordValidation
 
         if (validation.isValid) {
-            viewModel.login(email, password)
+            actualViewModel.login(email, password)
         } else {
             shouldShake = true
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .offset(x = offsetX.dp)
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = tween(600)) + slideInVertically(
+            initialOffsetY = { it / 3 },
+            animationSpec = tween(600, easing = EaseOutCubic)
+        )
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .offset(x = offsetX.dp)
+        ) {
         // Back arrow
         IconButton(
             onClick = onNavigateBack,
@@ -162,7 +182,7 @@ fun EmailLoginScreen(
                         emailValidation = null
                     }
                     if (uiState.errorMessage != null) {
-                        viewModel.clearError()
+                        actualViewModel.clearError()
                     }
                 },
                 placeholder = { Text("Email") },
@@ -212,7 +232,7 @@ fun EmailLoginScreen(
                         passwordValidation = null
                     }
                     if (uiState.errorMessage != null) {
-                        viewModel.clearError()
+                        actualViewModel.clearError()
                     }
                 },
                 placeholder = { Text("Constraseña") },
@@ -362,6 +382,7 @@ fun EmailLoginScreen(
                 }
             }
         }
+    }
     }
 }
 

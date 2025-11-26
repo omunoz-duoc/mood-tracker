@@ -32,7 +32,7 @@ fun WelcomeScreen(
         // Logo
         Image(
             painter = painterResource(id = R.drawable.icon),
-            contentDescription = "Mood Tracker Logo",
+            contentDescription = "Muud Logo",
             modifier = Modifier.size(120.dp)
         )
 

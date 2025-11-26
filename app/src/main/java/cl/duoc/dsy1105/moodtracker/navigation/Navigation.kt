@@ -20,14 +20,12 @@ import cl.duoc.dsy1105.moodtracker.notifications.NotificationHelper
 import androidx.lifecycle.viewmodel.compose.viewModel
 import cl.duoc.dsy1105.moodtracker.ui.screens.AddDetailsScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.EmailLoginScreen
-import cl.duoc.dsy1105.moodtracker.ui.screens.HistoryScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.HomeScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.LoadingScreen
-import cl.duoc.dsy1105.moodtracker.ui.screens.MoodSelectionScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.OnboardingScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.RegisterScreen
 import cl.duoc.dsy1105.moodtracker.ui.screens.WelcomeScreen
-import cl.duoc.dsy1105.moodtracker.ui.viewmodel.HistoryViewModel
+import cl.duoc.dsy1105.moodtracker.ui.viewmodel.HomeViewModel
 import cl.duoc.dsy1105.moodtracker.ui.viewmodel.MoodViewModel
 import kotlinx.coroutines.launch
 
@@ -150,6 +148,8 @@ fun MoodTrackerNavigation() {
         }
 
         composable(Screen.Home.route) {
+            val homeViewModel: HomeViewModel = viewModel { HomeViewModel(context) }
+            val homeUiState by homeViewModel.uiState.collectAsState()
             var userEmail by remember { mutableStateOf("") }
 
             LaunchedEffect(userId) {
@@ -159,9 +159,27 @@ fun MoodTrackerNavigation() {
                 }
             }
 
+            // Map UiMoodEntry to HomeScreen's MoodEntry
+            val moodEntries = homeUiState.moodEntries.map { uiEntry ->
+                cl.duoc.dsy1105.moodtracker.ui.screens.MoodEntry(
+                    id = uiEntry.id,
+                    moodType = uiEntry.moodType,
+                    moodEmoji = uiEntry.moodEmoji,
+                    date = uiEntry.date,
+                    tags = uiEntry.tags,
+                    note = uiEntry.note,
+                    hasAudio = uiEntry.hasAudio,
+                    audioDuration = uiEntry.audioDuration,
+                    imageUris = uiEntry.imageUris
+                )
+            }
+
             HomeScreen(
                 userEmail = userEmail,
                 notificationsEnabled = notificationsEnabled,
+                moodEntries = moodEntries,
+                isLoading = homeUiState.isLoading,
+                errorMessage = homeUiState.errorMessage,
                 onLogout = {
                     scope.launch {
                         sessionManager.clearSession()
@@ -192,14 +210,40 @@ fun MoodTrackerNavigation() {
                 },
                 onSearchClick = {
                     // TODO: Navigate to search screen
+                },
+                onDeleteEntry = { entryId ->
+                    homeViewModel.deleteMoodEntry(entryId)
                 }
             )
         }
 
-        composable(Screen.MoodSelection.route) {
+//        composable(Screen.MoodSelection.route) {
+//            val moodViewModel: MoodViewModel = viewModel { MoodViewModel(context) }
+//            val uiState by moodViewModel.uiState.collectAsState()
+//
+//            LaunchedEffect(uiState.isSaveSuccessful) {
+//                if (uiState.isSaveSuccessful) {
+//                    moodViewModel.resetSaveSuccess()
+//                    navController.popBackStack()
+//                }
+//            }
+//
+//            MoodSelectionScreen(
+//                onMoodSelected = { moodType, note ->
+//                    moodViewModel.saveMoodEntry(moodType, note)
+//                },
+//                onNavigateBack = {
+//                    navController.popBackStack()
+//                }
+//            )
+//        }
+
+        composable("${Screen.AddDetails.route}/{moodType}") { backStackEntry ->
+            val moodType = backStackEntry.arguments?.getString("moodType") ?: ""
             val moodViewModel: MoodViewModel = viewModel { MoodViewModel(context) }
             val uiState by moodViewModel.uiState.collectAsState()
 
+            // Navigate back after successful save
             LaunchedEffect(uiState.isSaveSuccessful) {
                 if (uiState.isSaveSuccessful) {
                     moodViewModel.resetSaveSuccess()
@@ -207,49 +251,23 @@ fun MoodTrackerNavigation() {
                 }
             }
 
-            MoodSelectionScreen(
-                onMoodSelected = { moodType, note ->
-                    moodViewModel.saveMoodEntry(moodType, note)
-                },
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable(Screen.History.route) {
-            val historyViewModel: HistoryViewModel = viewModel { HistoryViewModel(context) }
-            val uiState by historyViewModel.uiState.collectAsState()
-
-            HistoryScreen(
-                moodEntries = uiState.moodEntries,
-                isLoading = uiState.isLoading,
-                errorMessage = uiState.errorMessage,
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        composable("${Screen.AddDetails.route}/{moodType}") { backStackEntry ->
-            val moodType = backStackEntry.arguments?.getString("moodType") ?: ""
-            val moodViewModel: MoodViewModel = viewModel { MoodViewModel(context) }
-
             AddDetailsScreen(
                 moodType = moodType,
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onSave = { noteText, audioUri, imageUris ->
+                onSave = { noteText, audioUri, audioDuration, imageUris ->
                     // Save mood entry with details to database
                     moodViewModel.saveMoodEntryWithDetails(
                         moodType = moodType,
                         note = noteText,
                         audioUri = audioUri,
+                        audioDuration = audioDuration,
                         imageUris = imageUris
                     )
-                    navController.popBackStack()
-                }
+                },
+                errorMessage = uiState.errorMessage,
+                isLoading = uiState.isLoading
             )
         }
     }

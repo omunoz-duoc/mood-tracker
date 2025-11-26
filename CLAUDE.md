@@ -273,3 +273,4 @@ Room database (version 2) with the following entities:
 - Keep screens in `ui/screens/`, reusable components in `ui/components/`
 - when adding a new feature, list the file changes as bullet points in a .md file to track which files and what feature was added
 - The repository has 3 main branches: qa, prod and dev. We will work on dev, but when adding a new feature or working in something new you need to create a branch from dev (following the name convention feature/{my-feature}, e.g. feature/login-screen) and then merge this branch into dev
+- keep updating @GUIA-PRESENTACION.md when making changes to the project

@@ -11,7 +11,7 @@ import cl.duoc.dsy1105.moodtracker.data.local.entities.User
 
 @Database(
     entities = [User::class, MoodEntry::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

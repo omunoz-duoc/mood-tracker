@@ -14,11 +14,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,13 +41,15 @@ import java.util.*
 
 // Data class for mood entries
 data class MoodEntry(
+    val id: Long,
     val moodType: String,
     val moodEmoji: String,
     val date: Date,
     val tags: List<String>,
     val note: String,
     val hasAudio: Boolean = false,
-    val imageCount: Int = 0
+    val audioDuration: Int? = null, // Duration in seconds
+    val imageUris: List<String> = emptyList()
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,42 +57,17 @@ data class MoodEntry(
 fun HomeScreen(
     userEmail: String = "",
     notificationsEnabled: Boolean = false,
+    moodEntries: List<MoodEntry> = emptyList(),
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
     onLogout: () -> Unit = {},
     onTrackMood: () -> Unit = {},
     onViewHistory: () -> Unit = {},
     onToggleNotifications: (Boolean) -> Unit = {},
     onMoodSelected: (String) -> Unit = {},
-    onSearchClick: () -> Unit = {}
+    onSearchClick: () -> Unit = {},
+    onDeleteEntry: (Long) -> Unit = {}
 ) {
-    val sampleMoodEntries = listOf(
-        MoodEntry(
-            moodType = "Excelente",
-            moodEmoji = "😄",
-            date = Date(System.currentTimeMillis() - 2 * 60 * 60 * 1000),
-            tags = listOf("💼 Trabajo", "👪 Familia", "💪 Ejercicio"),
-            note = "Tuve un día increíble hoy! Completé mi proyecto y salí a correr por la tarde.",
-            hasAudio = true,
-            imageCount = 2
-        ),
-        MoodEntry(
-            moodType = "Bien",
-            moodEmoji = "🙂",
-            date = Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000),
-            tags = listOf("👥 Social", "😌 Relax"),
-            note = "Día tranquilo con amigos. Vimos una película y charlamos mucho.",
-            hasAudio = false,
-            imageCount = 1
-        ),
-        MoodEntry(
-            moodType = "Meh",
-            moodEmoji = "😐",
-            date = Date(System.currentTimeMillis() - 48 * 60 * 60 * 1000),
-            tags = listOf("💼 Trabajo", "😰 Estrés"),
-            note = "Día normal, nada especial. Un poco cansado del trabajo.",
-            hasAudio = false,
-            imageCount = 0
-        )
-    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -135,10 +122,97 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Error Message with animation
+            AnimatedVisibility(
+                visible = errorMessage != null,
+                enter = slideInVertically(
+                    initialOffsetY = { -it / 2 },
+                    animationSpec = tween(400)
+                ) + fadeIn(animationSpec = tween(400)),
+                exit = slideOutVertically(
+                    targetOffsetY = { -it / 2 },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            ) {
+                if (errorMessage != null) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = "Error",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Text(
+                                text = errorMessage,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+
+            // Loading Indicator
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
             // Mood Entry Cards
-            sampleMoodEntries.forEach { entry ->
-                MoodEntryCard(entry = entry)
-                Spacer(modifier = Modifier.height(12.dp))
+            if (!isLoading && moodEntries.isEmpty() && errorMessage == null) {
+                Text(
+                    text = "No hay entradas de ánimo aún. ¡Registra tu primer estado de ánimo!",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    textAlign = TextAlign.Center
+                )
+            } else {
+                moodEntries.forEachIndexed { index, entry ->
+                    AnimatedVisibility(
+                        visible = true,
+                        enter = slideInVertically(
+                            initialOffsetY = { it / 2 },
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                delayMillis = index * 50
+                            )
+                        ) + fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                delayMillis = index * 50
+                            )
+                        ),
+                        exit = slideOutHorizontally(
+                            targetOffsetX = { -it },
+                            animationSpec = tween(300)
+                        ) + fadeOut(animationSpec = tween(300))
+                    ) {
+                        MoodEntryCard(
+                            entry = entry,
+                            onDelete = { onDeleteEntry(entry.id) }
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
             }
         }
     }
@@ -199,9 +273,37 @@ fun MoodOption(
     label: String,
     onClick: () -> Unit
 ) {
+    var clicked by remember { mutableStateOf(false) }
+    val scale by animateFloatAsState(
+        targetValue = if (clicked) 1.2f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMedium
+        ),
+        label = "mood_scale"
+    )
+
+    androidx.compose.runtime.LaunchedEffect(clicked) {
+        if (clicked) {
+            kotlinx.coroutines.delay(200)
+            clicked = false
+        }
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable(onClick = onClick)
+        modifier = Modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                clicked = true
+                onClick()
+            }
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
     ) {
         Text(
             text = emoji,
@@ -219,8 +321,12 @@ fun MoodOption(
 }
 
 @Composable
-fun MoodEntryCard(entry: MoodEntry) {
+fun MoodEntryCard(
+    entry: MoodEntry,
+    onDelete: () -> Unit = {}
+) {
     val dateFormat = SimpleDateFormat("dd MMM, HH:mm", Locale("es", "ES"))
+    var showMenu by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -272,12 +378,33 @@ fun MoodEntryCard(entry: MoodEntry) {
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    IconButton(onClick = { /* More options */ }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Más opciones",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Box {
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(
+                                imageVector = Icons.Default.MoreVert,
+                                contentDescription = "Más opciones",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Eliminar") },
+                                onClick = {
+                                    showMenu = false
+                                    onDelete()
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Eliminar",
+                                        tint = MaterialTheme.colorScheme.error
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -337,7 +464,7 @@ fun MoodEntryCard(entry: MoodEntry) {
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                text = "0:24",
+                                text = formatDuration(entry.audioDuration),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -347,32 +474,37 @@ fun MoodEntryCard(entry: MoodEntry) {
             }
 
             // Image attachments
-            if (entry.imageCount > 0) {
+            if (entry.imageUris.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    repeat(entry.imageCount) {
-                        Surface(
-                            shape = MaterialTheme.shapes.small,
-                            color = Color.White,
-                            modifier = Modifier.size(80.dp)
-                        ) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Text(
-                                    text = "📷",
-                                    style = MaterialTheme.typography.headlineLarge
-                                )
-                            }
-                        }
+                    entry.imageUris.forEach { imageUri ->
+                        AsyncImage(
+                            model = imageUri,
+                            contentDescription = "Imagen adjunta",
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(MaterialTheme.shapes.small),
+                            contentScale = ContentScale.Crop
+                        )
                     }
                 }
             }
         }
     }
+}
+
+/**
+ * Format audio duration from seconds to MM:SS format
+ */
+private fun formatDuration(durationInSeconds: Int?): String {
+    if (durationInSeconds == null || durationInSeconds == 0) {
+        return "0:00"
+    }
+    val minutes = durationInSeconds / 60
+    val seconds = durationInSeconds % 60
+    return String.format("%d:%02d", minutes, seconds)
 }
 
 @Preview(showBackground = true)

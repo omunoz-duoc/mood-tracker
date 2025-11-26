@@ -78,6 +78,7 @@ class MoodViewModel(context: Context) : ViewModel() {
         moodType: String,
         note: String,
         audioUri: Uri?,
+        audioDuration: Int?,
         imageUris: List<Uri>
     ) {
         viewModelScope.launch {
@@ -108,6 +109,7 @@ class MoodViewModel(context: Context) : ViewModel() {
                     moodType = mappedMoodType,
                     note = note.ifBlank { null },
                     audioUri = audioUriString,
+                    audioDuration = audioDuration,
                     imageUris = imageUriStrings.ifEmpty { null }
                 )
 

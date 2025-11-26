@@ -3,6 +3,7 @@ package cl.duoc.dsy1105.moodtracker.data.local.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import cl.duoc.dsy1105.moodtracker.data.local.entities.MoodEntry
 import kotlinx.coroutines.flow.Flow
 
@@ -11,6 +12,9 @@ interface MoodDao {
 
     @Insert
     suspend fun insertMoodEntry(moodEntry: MoodEntry): Long
+
+    @Update
+    suspend fun updateMoodEntry(moodEntry: MoodEntry)
 
     @Query("SELECT * FROM mood_entries WHERE userId = :userId ORDER BY date DESC")
     fun getAllMoodEntriesForUser(userId: Long): Flow<List<MoodEntry>>

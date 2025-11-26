@@ -25,6 +25,7 @@ data class MoodEntry(
     val moodType: String, // Store enum name as string
     val note: String? = null,
     val audioUri: String? = null,
+    val audioDuration: Int? = null, // Audio duration in seconds
     val imageUris: String? = null, // Comma-separated list of image URIs
     val date: Long = System.currentTimeMillis()
 ) {
@@ -50,6 +51,7 @@ data class MoodEntry(
             moodType: MoodType,
             note: String? = null,
             audioUri: String? = null,
+            audioDuration: Int? = null,
             imageUris: List<String>? = null
         ): MoodEntry {
             return MoodEntry(
@@ -57,6 +59,7 @@ data class MoodEntry(
                 moodType = moodType.name,
                 note = note,
                 audioUri = audioUri,
+                audioDuration = audioDuration,
                 imageUris = imageUris?.joinToString(",")
             )
         }
