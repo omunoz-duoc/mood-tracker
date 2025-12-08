@@ -22,3 +22,6 @@ local.properties
 *.md
 !README.md
 !CLAUDE.md
+
+# keys
+.jks
